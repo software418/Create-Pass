@@ -26,7 +26,7 @@ export const submitGatePass = async (data: any) => {
       }
     });
 
-    const response = await fetch("YOUR_API_ENDPOINT_HERE", {
+    const response = await fetch("/capture/submit", {
       method: "POST",
       body: formData,
       // Note: Don't set Content-Type header manually when sending FormData

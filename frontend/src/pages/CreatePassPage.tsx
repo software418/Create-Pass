@@ -188,6 +188,7 @@ const CreatePassPage: React.FC = () => {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
+    
     e.preventDefault();
     if (!photo) return alert("Please take a photo!");
     const submissionData = { ...formData, photo };
@@ -553,7 +554,7 @@ const CreatePassPage: React.FC = () => {
         onCapture={(blob: React.SetStateAction<Blob | null>) => setPhoto(blob)} 
       />
             <div className="flex gap-4 justify-center border-t-2 border-gray-200 pt-6">
-              <Button type="submit" className="px-8 py-2 bg-red-600 text-white font-semibold rounded">Submit</Button>
+              <Button type="submit" onClick={handleSubmit} className="px-8 py-2 bg-red-600 text-white font-semibold rounded">Submit</Button>
               <Button type="button" onClick={handleClear} className="px-8 py-2 bg-gray-500 text-white font-semibold rounded">Clear</Button>
             </div>
           </form>

@@ -4,14 +4,15 @@ import { securityHeaders, sanitizeInput } from './middleware/sanitize.middleware
 import { apiLimiter } from './middleware/ratelimit.middleware';
 import { morganMiddleware } from './middleware/morgan.middleware';
 import { errorHandler } from './middleware/errorHandler';
-import { AppError } from './utils/appError';
 import authRoutes from './features/auth/auth.routes';
 import captureRoutes from './features/capture/formRoutes';
+
 const app = express();
 
 // 1. GLOBAL MIDDLEWARES
 // Set security HTTP headers
 app.use(securityHeaders);
+
 
 // Development logging
 app.use(morganMiddleware);
@@ -37,9 +38,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/capture', captureRoutes);
 
 
-app.all('*', (req, res, next) => {
-  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
-});
+
 
 // 3. ERROR HANDLING MIDDLEWARE
 app.use(errorHandler);
