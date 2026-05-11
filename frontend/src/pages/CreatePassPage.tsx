@@ -4,13 +4,15 @@ import { Button } from "../shared/ui/atoms/Button";
 import { Checkbox } from "../shared/ui/atoms/Checkbox";
 import { FormField } from "../shared/ui/molecules/FormField";
 import { Input } from "../shared/ui/atoms/Input";
+import { API_ENDPOINTS } from "../shared/const/api";
+import api from "../shared/services/api";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
 } from "../shared/ui/molecules/Card";
-import { CameraInput } from '../pages/CameraInput';
+import { CameraInput, type CameraInputHandle } from "../pages/CameraInput";
 
 interface PersonDetail {
   name: string;
@@ -51,7 +53,6 @@ interface FormData {
   allowedHours: string;
 }
 
-
 const CreatePassPage: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     gatePassType: "single",
@@ -85,8 +86,8 @@ const CreatePassPage: React.FC = () => {
     allowedHours: "",
   });
 
-  const [photo, setPhoto] = useState<Blob | null>(null);
   const [cities, setCities] = useState<string[]>([]);
+  const cameraInputRef = React.useRef<CameraInputHandle>(null);
 
   // Fixed Type Syntax here
   const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -94,7 +95,7 @@ const CreatePassPage: React.FC = () => {
     setFormData((prev) => ({
       ...prev,
       state: selectedState,
-      city: "", 
+      city: "",
     }));
 
     const stateCities =
@@ -110,7 +111,9 @@ const CreatePassPage: React.FC = () => {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -120,7 +123,9 @@ const CreatePassPage: React.FC = () => {
   };
 
   // Separated Select Change for better TS clarity
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+  const handleSelectChange = (
+    e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -161,9 +166,9 @@ const CreatePassPage: React.FC = () => {
     // Create a copy of the person object to update
     newPersons[index] = {
       ...newPersons[index],
-      [field]: value
+      [field]: value,
     };
-    
+
     setFormData((prev) => ({
       ...prev,
       persons: newPersons,
@@ -187,17 +192,52 @@ const CreatePassPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    
-    e.preventDefault();
-    if (!photo) return alert("Please take a photo!");
-    const submissionData = { ...formData, photo };
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   const capture = await cameraInputRef.current?.takePhoto();
+
+  //   if (!capture) return alert("Please take a photo!");
+  //   if (capture) {
+  //     const submissionData = { ...formData, capture };
+
+  //     const formDataObj = new FormData();
+  //     formDataObj.append("photo", capture, "my-photo.jpg");
+
+  //     const responce = await api.post(API_ENDPOINTS.UPLOAD, formDataObj, {
+  //       headers: {
+  //         "Content-Type": "multipart/form-data",
+  //       },
+  //     });
+  //     console.log("API Response:", responce);
+  //     console.log("Submitting form with data:", submissionData);
+  //   }
+  // };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    const capture = await cameraInputRef.current?.takePhoto();
+    if (!capture) return alert("Please take a photo!");
 
     const formDataObj = new FormData();
-    formDataObj.append('photo', photo, 'my-photo.jpg');
-    console.log("Submitting form with data:", submissionData);
- 
-  };
+    formDataObj.append("photo", capture, "my-photo.jpg");
+    // Add other fields to formDataObj here...
+
+    // FIX IS HERE: Ensure the brackets match up
+    const responce = await api.post(API_ENDPOINTS.UPLOAD, formDataObj, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }); // <--- Make sure this is });
+
+    console.log("API Response:", responce);
+    
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
+
 
   const handleClear = () => {
     setFormData({
@@ -235,9 +275,20 @@ const CreatePassPage: React.FC = () => {
   };
 
   const visitAreaOptions = [
-    "CPVC PLANT", "CA 1 PLANT", "STORE AREA", "H2O2 AREA", "OCD BLOCK",
-    "CT PROJECT AREA", "ECH PLANT", "SECURITY BLOCK", "CA 2 PLANT",
-    "CPP (POWER PLANT)", "SAFETY BLOCK", "CMS PLANT", "H2O2 PLANT", "ADMIN_BLOCK",
+    "CPVC PLANT",
+    "CA 1 PLANT",
+    "STORE AREA",
+    "H2O2 AREA",
+    "OCD BLOCK",
+    "CT PROJECT AREA",
+    "ECH PLANT",
+    "SECURITY BLOCK",
+    "CA 2 PLANT",
+    "CPP (POWER PLANT)",
+    "SAFETY BLOCK",
+    "CMS PLANT",
+    "H2O2 PLANT",
+    "ADMIN_BLOCK",
   ];
 
   return (
@@ -288,16 +339,36 @@ const CreatePassPage: React.FC = () => {
             </div>
 
             <div className="space-y-6 border-t-2 border-gray-200 pt-6">
-              <h3 className="text-lg font-semibold text-gray-800">Personal Information</h3>
+              <h3 className="text-lg font-semibold text-gray-800">
+                Personal Information
+              </h3>
               <div className="grid grid-cols-2 gap-6">
                 <FormField label="Name">
-                  <Input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Enter name" />
+                  <Input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Enter name"
+                  />
                 </FormField>
                 <FormField label="Mobile No">
-                  <Input type="tel" name="mobileNo" value={formData.mobileNo} onChange={handleInputChange} placeholder="Enter mobile number" />
+                  <Input
+                    type="tel"
+                    name="mobileNo"
+                    value={formData.mobileNo}
+                    onChange={handleInputChange}
+                    placeholder="Enter mobile number"
+                  />
                 </FormField>
                 <FormField label="Email-Id">
-                  <Input type="email" name="emailId" value={formData.emailId} onChange={handleInputChange} placeholder="Enter email" />
+                  <Input
+                    type="email"
+                    name="emailId"
+                    value={formData.emailId}
+                    onChange={handleInputChange}
+                    placeholder="Enter email"
+                  />
                 </FormField>
                 <FormField label="Address">
                   <textarea
@@ -313,7 +384,13 @@ const CreatePassPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-6">
                 <FormField label="Company Name">
-                  <Input type="text" name="companyName" value={formData.companyName} onChange={handleInputChange} placeholder="Enter company name" />
+                  <Input
+                    type="text"
+                    name="companyName"
+                    value={formData.companyName}
+                    onChange={handleInputChange}
+                    placeholder="Enter company name"
+                  />
                 </FormField>
               </div>
 
@@ -327,7 +404,9 @@ const CreatePassPage: React.FC = () => {
                   >
                     <option value="">Select State</option>
                     {Object.keys(LocationStateData).map((state) => (
-                      <option key={state} value={state}>{state}</option>
+                      <option key={state} value={state}>
+                        {state}
+                      </option>
                     ))}
                   </select>
                 </FormField>
@@ -342,7 +421,9 @@ const CreatePassPage: React.FC = () => {
                   >
                     <option value="">SELECT</option>
                     {cities.map((city) => (
-                      <option key={city} value={city}>{city}</option>
+                      <option key={city} value={city}>
+                        {city}
+                      </option>
                     ))}
                   </select>
                 </FormField>
@@ -399,15 +480,20 @@ const CreatePassPage: React.FC = () => {
 
               <FormField label="Carry With">
                 <div className="space-y-2">
-                  {(['mobile', 'laptop', 'pendrive', 'camera'] as const).map((item) => (
-                    <label key={item} className="flex items-center cursor-pointer">
-                      <Checkbox
-                        checked={formData.carryWith[item]}
-                        onChange={(e) => handleCheckboxChange(e, item)}
-                      />
-                      <span className="ml-2 text-sm uppercase">{item}</span>
-                    </label>
-                  ))}
+                  {(["mobile", "laptop", "pendrive", "camera"] as const).map(
+                    (item) => (
+                      <label
+                        key={item}
+                        className="flex items-center cursor-pointer"
+                      >
+                        <Checkbox
+                          checked={formData.carryWith[item]}
+                          onChange={(e) => handleCheckboxChange(e, item)}
+                        />
+                        <span className="ml-2 text-sm uppercase">{item}</span>
+                      </label>
+                    ),
+                  )}
                 </div>
               </FormField>
             </div>
@@ -428,7 +514,13 @@ const CreatePassPage: React.FC = () => {
               </FormField>
 
               <FormField label="Id Number">
-                <Input type="text" name="idNumber" value={formData.idNumber} onChange={handleInputChange} placeholder="Enter ID number" />
+                <Input
+                  type="text"
+                  name="idNumber"
+                  value={formData.idNumber}
+                  onChange={handleInputChange}
+                  placeholder="Enter ID number"
+                />
               </FormField>
             </div>
 
@@ -473,24 +565,52 @@ const CreatePassPage: React.FC = () => {
                 </FormField>
 
                 <FormField label="No of Person">
-                  <Input type="number" name="noOfPerson" value={formData.noOfPerson} onChange={handleInputChange} placeholder="Enter number" min="1" />
+                  <Input
+                    type="number"
+                    name="noOfPerson"
+                    value={formData.noOfPerson}
+                    onChange={handleInputChange}
+                    placeholder="Enter number"
+                    min="1"
+                  />
                 </FormField>
               </div>
             </div>
 
             <div className="border-t-2 border-gray-200 pt-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Person Details</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Person Details
+              </h3>
               {formData.persons.map((person, index) => (
                 <div key={index} className="mb-6 p-4 bg-gray-50 rounded-lg">
                   <div className="grid grid-cols-4 gap-4">
                     <FormField label="Person Name">
-                      <Input value={person.name} onChange={(e) => handlePersonChange(index, "name", e.target.value)} />
+                      <Input
+                        value={person.name}
+                        onChange={(e) =>
+                          handlePersonChange(index, "name", e.target.value)
+                        }
+                      />
                     </FormField>
                     <FormField label="Person Phone No">
-                      <Input value={person.phoneNo} onChange={(e) => handlePersonChange(index, "phoneNo", e.target.value)} />
+                      <Input
+                        value={person.phoneNo}
+                        onChange={(e) =>
+                          handlePersonChange(index, "phoneNo", e.target.value)
+                        }
+                      />
                     </FormField>
                     <FormField label="Aadhar Number">
-                      <Input value={person.aadharNumber} onChange={(e) => handlePersonChange(index, "aadharNumber", e.target.value)} />
+                      <Input
+                        value={person.aadharNumber}
+                        onChange={(e) =>
+                          handlePersonChange(
+                            index,
+                            "aadharNumber",
+                            e.target.value,
+                          )
+                        }
+                      />
                     </FormField>
                     <FormField label="Aadhar File">
                       <div className="flex items-center gap-2">
@@ -498,27 +618,55 @@ const CreatePassPage: React.FC = () => {
                           type="file"
                           id={`file-${index}`}
                           className="hidden"
-                          onChange={(e) => handlePersonChange(index, "aadharFile", e.target.files?.[0] || null)}
+                          onChange={(e) =>
+                            handlePersonChange(
+                              index,
+                              "aadharFile",
+                              e.target.files?.[0] || null,
+                            )
+                          }
                         />
-                        <label htmlFor={`file-${index}`} className="px-3 py-2 bg-white border border-gray-300 rounded cursor-pointer text-xs">
-                          {person.aadharFile ? person.aadharFile.name : "Choose File"}
+                        <label
+                          htmlFor={`file-${index}`}
+                          className="px-3 py-2 bg-white border border-gray-300 rounded cursor-pointer text-xs"
+                        >
+                          {person.aadharFile
+                            ? person.aadharFile.name
+                            : "Choose File"}
                         </label>
                         {formData.persons.length > 1 && (
-                          <Button type="button" onClick={() => removePerson(index)} className="bg-red-600 text-white text-xs px-2 py-1">X</Button>
+                          <Button
+                            type="button"
+                            onClick={() => removePerson(index)}
+                            className="bg-red-600 text-white text-xs px-2 py-1"
+                          >
+                            X
+                          </Button>
                         )}
                       </div>
                     </FormField>
                   </div>
                 </div>
               ))}
-              <Button type="button" onClick={addPerson} className="bg-red-600 text-white px-4 py-2">+ Add Person</Button>
+              <Button
+                type="button"
+                onClick={addPerson}
+                className="bg-red-600 text-white px-4 py-2"
+              >
+                + Add Person
+              </Button>
             </div>
 
             <div className="border-t-2 border-gray-200 pt-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Visit Area</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Visit Area
+              </h3>
               <div className="grid grid-cols-3 gap-4">
                 {visitAreaOptions.map((area) => (
-                  <label key={area} className="flex items-center cursor-pointer">
+                  <label
+                    key={area}
+                    className="flex items-center cursor-pointer"
+                  >
                     <Checkbox
                       checked={formData.visitArea.includes(area)}
                       onChange={(e) => handleCheckboxChange(e, "visitArea")}
@@ -532,30 +680,59 @@ const CreatePassPage: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-6 border-t-2 border-gray-200 pt-6">
               <FormField label="Temperature">
-                <Input name="temperature" value={formData.temperature} onChange={handleInputChange} />
+                <Input
+                  name="temperature"
+                  value={formData.temperature}
+                  onChange={handleInputChange}
+                />
               </FormField>
               <FormField label="Token">
-                <Input name="token" value={formData.token} onChange={handleInputChange} />
+                <Input
+                  name="token"
+                  value={formData.token}
+                  onChange={handleInputChange}
+                />
               </FormField>
               <FormField label="Purpose">
-                <select name="purpose" value={formData.purpose} onChange={handleSelectChange} className="w-full px-3 py-2 border-b-2 border-gray-300 outline-none">
+                <select
+                  name="purpose"
+                  value={formData.purpose}
+                  onChange={handleSelectChange}
+                  className="w-full px-3 py-2 border-b-2 border-gray-300 outline-none"
+                >
                   <option value="">Select</option>
                   <option value="AUDIT">AUDIT</option>
                   <option value="MEETING">MEETING</option>
                 </select>
               </FormField>
               <FormField label="Allowed Hours">
-                <Input name="allowedHours" value={formData.allowedHours} onChange={handleInputChange} />
+                <Input
+                  name="allowedHours"
+                  value={formData.allowedHours}
+                  onChange={handleInputChange}
+                />
               </FormField>
             </div>
-                 <CameraInput 
-        width="400px" 
-        height="300px" 
-        onCapture={(blob: React.SetStateAction<Blob | null>) => setPhoto(blob)} 
-      />
+            <CameraInput
+              ref={cameraInputRef}
+              width="400px"
+              height="300px"
+              onCapture={() => {}}
+            />
             <div className="flex gap-4 justify-center border-t-2 border-gray-200 pt-6">
-              <Button type="submit" onClick={handleSubmit} className="px-8 py-2 bg-red-600 text-white font-semibold rounded">Submit</Button>
-              <Button type="button" onClick={handleClear} className="px-8 py-2 bg-gray-500 text-white font-semibold rounded">Clear</Button>
+              <Button
+                type="submit"
+                className="px-8 py-2 bg-red-600 text-white font-semibold rounded"
+              >
+                Submit
+              </Button>
+              <Button
+                type="button"
+                onClick={handleClear}
+                className="px-8 py-2 bg-gray-500 text-white font-semibold rounded"
+              >
+                Clear
+              </Button>
             </div>
           </form>
         </CardContent>

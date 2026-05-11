@@ -1,12 +1,18 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
+import logger from "../../utils/logger.utils";
 
-export const processForm = async (data: FormData, file: Express.Multer.File | undefined) => {
-  if (!file) throw new Error('No photo provided');
+export const processForm = async (
+  data: FormData,
+  file: Express.Multer.File | undefined,
+) => {
+  if (!file) throw new Error("No photo provided");
 
   // 1. Define the destination directory
-  const uploadDir = path.join(__dirname, '../uploads');
-  console.log(`Processing form for user ${data.get('username')}, saving file to ${uploadDir}`);
+  const uploadDir = path.join(__dirname, "../uploads");
+  logger.info(
+    `Processing form for user , saving file to ${uploadDir}`,
+  );
   // 2. Ensure the directory exists
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -22,10 +28,11 @@ export const processForm = async (data: FormData, file: Express.Multer.File | un
   // If you are using memoryStorage, use fs.writeFileSync:
   fs.writeFileSync(savePath, file.buffer);
 
-  console.log(`Saving user ${data.get('username')} with file ${fileName}`);
-  
+  logger.info(`Saving user  with file ${fileName}`);
+
   return {
     success: true,
-    photoUrl: `/uploads/${fileName}`
+    photoUrl: `/uploads/${fileName}`,
+    data: data
   };
 };
