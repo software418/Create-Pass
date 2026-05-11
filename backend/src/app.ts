@@ -9,14 +9,17 @@ import morgan from "morgan";
 import logger from "./utils/logger.utils";
 import { errorHandler } from "./middleware/errorHandler";
 import authRoutes from "./features/auth/auth.routes";
-import captureRoutes from "./features/capture/formRoutes";
+import captureRoutes from "./features/gate_pass/gp.routes";
 
 const app = express();
 
 // 1. GLOBAL MIDDLEWARES
 // Set security HTTP headers
 app.use(securityHeaders);
-
+app.use("/api", apiLimiter);
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+app.use(sanitizeInput);
 // Development logging
 
 const stream = { write: (message: String) => logger.http(message.trim()) };
@@ -29,12 +32,6 @@ app.use(
   ),
 );
 
-// Limit requests from same API
-app.use("/api", apiLimiter);
-
-// Body parser, reading data from body into req.body
-app.use(express.json({ limit: "10kb" }));
-app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 
 // Implement CORS
 app.use(
@@ -45,7 +42,9 @@ app.use(
 );
 
 // Data sanitization against XSS
-app.use(sanitizeInput);
+
+
+logger.info(`Routing requested`);
 
 // 2. ROUTES
 app.use("/api/v1/auth", authRoutes);

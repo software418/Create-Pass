@@ -2,7 +2,7 @@ import env from './config/env';
 import app from './app';
 import express from 'express';
 import path from 'path';
-// import { connectDB } from './config/db';
+import { connectDB } from './config/db';
 import logger from './utils/logger.utils';
 
 process.on('uncaughtException', (err: Error) => {
@@ -11,7 +11,7 @@ process.on('uncaughtException', (err: Error) => {
   process.exit(1);
 });
 
-// connectDB();
+connectDB();
 
 const port = env.PORT || 5000;
 const server = app.listen(port, () => {
@@ -19,7 +19,7 @@ const server = app.listen(port, () => {
   console.log(`App running on port ${port}...`);
 });
 
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
 
 process.on('unhandledRejection', (err: any) => {
   logger.error('UNHANDLED REJECTION! 💥 Shutting down...');
