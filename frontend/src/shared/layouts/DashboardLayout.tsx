@@ -7,7 +7,7 @@ import { Avatar } from '../ui/atoms/Avatar';
 
 export const DashboardLayout = () => {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-surface">
       <Navbar>
         <div className="flex flex-1 items-center justify-between">
           <div className="font-bold text-xl tracking-tight text-primary">VMS</div>

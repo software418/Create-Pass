@@ -284,7 +284,7 @@ const CreatePassPage: React.FC = () => {
 
   return (
     <div className="min-h-screen .bg-surface">
-      <Card className="max-w-6xl mx-auto shadow-lg">
+      <Card className="max-w-6xl mx-auto shadow-lg .bg-surface">
         <CardHeader>
           <CardTitle>Create Gate Pass</CardTitle>
         </CardHeader>
