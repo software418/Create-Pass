@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { LocationService } from '../utils/location.utill';
 
 export const useLocation = () => {
-  const [states] = useState(LocationService.getIndiaStates());
+  const [states] = useState<any>(LocationService.getIndiaStates());
   const [cities, setCities] = useState<any[]>([]);
   const [selectedState, setSelectedState] = useState('');
 

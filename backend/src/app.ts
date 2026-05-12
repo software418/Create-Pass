@@ -7,7 +7,7 @@ import {
 import { apiLimiter } from "./middleware/ratelimit.middleware";
 import morgan from "morgan";
 import logger from "./utils/logger.utils";
-import { errorHandler } from "./middleware/errorHandler";
+import  errorHandler  from "./middleware/errorHandler";
 import authRoutes from "./features/auth/auth.routes";
 import captureRoutes from "./features/gate_pass/gp.routes";
 

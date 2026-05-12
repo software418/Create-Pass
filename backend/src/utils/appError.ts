@@ -1,14 +1,20 @@
-export class AppError extends Error {
+class AppError extends Error {
+  // 1. Declare property types here
   public statusCode: number;
-  public status: string;
+  public errorCode: string | number;
+  public errors?: any; // Optional property
   public isOperational: boolean;
 
-  constructor(message: string, statusCode: number) {
+  constructor(message: string, statusCode: number, errorCode: string | number, errors?: any) {
     super(message);
     this.statusCode = statusCode;
-    this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
+    this.errorCode = errorCode;
+    this.errors = errors;
     this.isOperational = true;
 
-    Error.captureStackTrace(this, this.constructor);
+    // Use Error.captureStackTrace only if it exists (Node.js environments)
+    
   }
 }
+
+export default AppError;
