@@ -102,7 +102,7 @@ export const updateEmployee = async (
   if (!exist) {
     throw new AppError("Employee not found", 404, "NOT_FOUND");
   }
-  const employee =await Employee.findByIdAndUpdate(employeeId, { $set: data });
+  const employee = await Employee.findByIdAndUpdate(employeeId, { $set: data });
   return employee;
 };
 export const updatepurpose = async (
@@ -116,7 +116,7 @@ export const updatepurpose = async (
   if (!exist) {
     throw new AppError("Purpose not found", 404, "NOT_FOUND");
   }
-  const purpose =await Purpose.findByIdAndUpdate(purposeId, { $set: data });
+  const purpose = await Purpose.findByIdAndUpdate(purposeId, { $set: data });
   return purpose;
 };
 export const updateCarrywith = async (
@@ -130,7 +130,7 @@ export const updateCarrywith = async (
   if (!exist) {
     throw new AppError("Carry With Item not found", 404, "NOT_FOUND");
   }
-  const item =await CarryWith.findByIdAndUpdate(itemId, { $set: data });
+  const item = await CarryWith.findByIdAndUpdate(itemId, { $set: data });
   return item;
 };
 export const updateVisitingArea = async (
@@ -144,7 +144,7 @@ export const updateVisitingArea = async (
   if (!exist) {
     throw new AppError("Area not found", 404, "NOT_FOUND");
   }
-  const area =await VisitingArea.findByIdAndUpdate(areaId, { $set: data });
+  const area = await VisitingArea.findByIdAndUpdate(areaId, { $set: data });
   return area;
 };
 export const updateVisitortype = async (
@@ -172,8 +172,65 @@ export const delteEmployee = async (employeeId: String) => {
   if (!exist) {
     throw new AppError("Employee not found", 404, "NOT_FOUND");
   }
-  if(exist && exist.status === "deleted"){
-     throw new AppError('Account is already deleted', 409, 'CONFLICT');
+  if (exist && exist.status === "deleted") {
+    throw new AppError("Account is already deleted", 409, "CONFLICT");
   }
-  const employee = await Employee.findOneAndDelete({_id: employeeId})
+  const employee = await Employee.findOneAndDelete({ _id: employeeId });
+  return employee;
+};
+export const deletePurpose = async (purposeId: String) => {
+  logger.info(
+    `[SERVICE]{master/master.service --deleteEmployee} deleteEmployee requested for ID: ${purposeId}`,
+  );
+  const exist = await Purpose.findById(purposeId);
+  if (!exist) {
+    throw new AppError("Purpose not found", 404, "NOT_FOUND");
+  }
+  if (exist && exist.status === "deleted") {
+    throw new AppError("Purpose is already deleted", 409, "CONFLICT");
+  }
+  const purpose = await Purpose.findOneAndDelete({ _id: purposeId });
+  return purpose;
+};
+export const deleteCarryWith = async (itemId: String) => {
+  logger.info(
+    `[SERVICE]{master/master.service --deleteEmployee} deleteEmployee requested for ID: ${itemId}`,
+  );
+  const exist = await CarryWith.findById(itemId);
+  if (!exist) {
+    throw new AppError("Item not found", 404, "NOT_FOUND");
+  }
+  if (exist && exist.status === "deleted") {
+    throw new AppError("Item is already deleted", 409, "CONFLICT");
+  }
+  const carrywith = await CarryWith.findOneAndDelete({ _id: itemId });
+  return carrywith;
+};
+export const deleteVisitorArea = async (areaId: String) => {
+  logger.info(
+    `[SERVICE]{master/master.service --deleteEmployee} deleteEmployee requested for ID: ${areaId}`,
+  );
+  const exist = await VisitingArea.findById(areaId);
+  if (!exist) {
+    throw new AppError("Employee not found", 404, "NOT_FOUND");
+  }
+  if (exist && exist.status === "deleted") {
+    throw new AppError("Account is already deleted", 409, "CONFLICT");
+  }
+  const area = await VisitingArea.findOneAndDelete({ _id: areaId });
+  return area;
+};
+export const deleteVisitorType = async (visitorId: String) => {
+  logger.info(
+    `[SERVICE]{master/master.service --deleteEmployee} deleteEmployee requested for ID: ${visitorId}`,
+  );
+  const exist = await VisitorType.findById(visitorId);
+  if (!exist) {
+    throw new AppError("Employee not found", 404, "NOT_FOUND");
+  }
+  if (exist && exist.status === "deleted") {
+    throw new AppError("Account is already deleted", 409, "CONFLICT");
+  }
+  const visitor = await VisitorType.findOneAndDelete({ _id: visitorId });
+  return visitor;
 };

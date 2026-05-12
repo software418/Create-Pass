@@ -23,6 +23,8 @@ interface PersonDetail {
 
 interface FormData {
   gatePassType: "single" | "multi";
+  from: string;
+  to: string;
   passDate: string;
   mobileNo: string;
   name: string;
@@ -53,7 +55,9 @@ interface FormData {
 
 const INITIAL_FORM_DATA: FormData = {
   gatePassType: "single",
-  passDate: "",
+  passDate: `${Date.now}`,
+  from: "",
+  to: "",
   mobileNo: "",
   name: "",
   emailId: "",
@@ -170,19 +174,19 @@ const CreatePassPage: React.FC = () => {
     setFormData(INITIAL_FORM_DATA);
     cameraInputRef.current?.resetCamera();
   };
-const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  const value = e.target.value;
-  
-  // 1. Tell the hook to filter cities
-  setSelectedState(value); 
-  
-  // 2. Update your main form data
-  setFormData((prev) => ({ 
-    ...prev, 
-    state: value, 
-    city: '' // Important: Reset city when state changes
-  }));
-};
+  const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+
+    // 1. Tell the hook to filter cities
+    setSelectedState(value);
+
+    // 2. Update your main form data
+    setFormData((prev) => ({
+      ...prev,
+      state: value,
+      city: "", // Important: Reset city when state changes
+    }));
+  };
   // ── Submit ─────────────────────────────────────────────────────────────────
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -279,7 +283,7 @@ const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
+    <div className="min-h-screen .bg-surface">
       <Card className="max-w-6xl mx-auto shadow-lg">
         <CardHeader>
           <CardTitle>Create Gate Pass</CardTitle>
@@ -320,6 +324,28 @@ const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
                   onChange={handleInputChange}
                 />
               </FormField>
+              {formData.gatePassType === "multi" && (
+                <>
+                  <FormField label="From">
+                    <Input
+                      type="date"
+                      name="from"
+                      disabled={formData.gatePassType !== "multi"}
+                      value={formData.from}
+                      onChange={handleInputChange}
+                    />
+                  </FormField>
+                  <FormField label="To">
+                    <Input
+                      type="date"
+                      name="to"
+                      disabled={formData.gatePassType !== "multi"}
+                      value={formData.to}
+                      onChange={handleInputChange}
+                    />
+                  </FormField>
+                </>
+              )}
             </div>
 
             {/* Personal Information */}

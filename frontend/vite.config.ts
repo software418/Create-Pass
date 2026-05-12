@@ -1,16 +1,15 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-// import tailwindcss from '@tailwindcss/vite'
+import tailwindcss from '@tailwindcss/vite';
 import tsconfigPaths from "vite-tsconfig-paths";
-
 export default defineConfig({
   plugins: [
     react(),
-    // tailwindcss(),
-    tsconfigPaths(),
+    tailwindcss(),
+    tsconfigPaths()
+    // Remove tsconfigPaths() from here
   ],
   build: {
-    cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks(id) {
