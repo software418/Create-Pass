@@ -1,28 +1,28 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import path from 'path'
-import { fileURLToPath } from 'url'
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    // Remove tsconfigPaths() from here
   ],
- resolve: {
+  resolve: {
     alias: { '@': path.resolve(__dirname, './src') }
   },
   build: {
     cssCodeSplit: true,
-    rollupOptions: {      
+    // FIX: Changed from rollupOptions to rolldownOptions to align with the new Rust-powered engine
+    rolldownOptions: {      
       output: {
         manualChunks(id) {
           if (!id.includes("node_modules")) return;
           if (id.includes("react-router-dom")) return "router";
+          // Rolldown implicitly handles other chunks safely
         },
       },
     },

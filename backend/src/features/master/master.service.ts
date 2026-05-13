@@ -3,233 +3,302 @@ import { Employee } from "./employee.model";
 import { Purpose } from "./purpose.model";
 import { VisitingArea } from "./visiting_area.model";
 import { VisitorType } from "./visitor_type.model";
+import { STATUS as CarryStatus } from "./carry_with.model";
+import { STATUS as EmployeeStatus } from "./employee.model";
+import { STATUS as PurposeStatus } from "./purpose.model";
+import { STATUS as AreaStatus } from "./visiting_area.model";
+import { STATUS as VisitorStatus } from "./visitor_type.model";
+
 import logger from "../../utils/logger.utils";
 import AppError from "../../utils/appError";
 
-//--------------------------------------GET Service----------------------------------------------------------------------------------------------
-export const getPurpose = async () => {
+// ─────────────────────────────────────────────────────────────
+// GET Services
+// ─────────────────────────────────────────────────────────────
+
+export const getPurposeService = async () => {
   logger.info(
-    `[SERVICE]{master/master.service--getPurpose} getPurpose requested`,
+    `[SERVICE]{master/master.service--getPurpose} getPurpose requested`
   );
   const purpose = await Purpose.find({ status: "active" });
   return purpose;
 };
 
-export const getEmployee = async () => {
+export const getEmployeeService = async () => {
   logger.info(
-    `[SERVICE]{master/master.service--getEmployee} getEmployee requested`,
+    `[SERVICE]{master/master.service--getEmployee} getEmployee requested`
   );
   const employee = await Employee.find({ status: "active" });
   return employee;
 };
 
-export const getVisitingArea = async () => {
+// BUG FIX: was querying CarryWith instead of VisitingArea
+export const getVisitingAreaService = async () => {
   logger.info(
-    `[SERVICE]{master/master.service--getVisitingArea} getVisitingArea requested`,
+    `[SERVICE]{master/master.service--getVisitingArea} getVisitingArea requested`
   );
-  const carrywith = await CarryWith.find({ status: "active" });
-  return carrywith;
+  const visitingArea = await VisitingArea.find({ status: "active" });
+  return visitingArea;
 };
 
-export const getCarryWith = async () => {
+// BUG FIX: was querying VisitingArea instead of CarryWith
+export const getCarryWithService = async () => {
   logger.info(
-    `[SERVICE]{master/master.service--getCarryWith} getCarryWith requested`,
+    `[SERVICE]{master/master.service--getCarryWith} getCarryWith requested`
   );
-  const visitingarea = await VisitingArea.find({ status: "active" });
-  return visitingarea;
+  const carryWith = await CarryWith.find({ status: "active" });
+  return carryWith;
 };
 
-export const getVisitorType = async () => {
+export const getVisitorTypeService = async () => {
   logger.info(
-    `[SERVICE]{master/master.service--getVisitorType} getVisitorType requested`,
+    `[SERVICE]{master/master.service--getVisitorType} getVisitorType requested`
   );
-  const visitortype = await VisitorType.find({ status: "active" });
-  return visitortype;
+  const visitorType = await VisitorType.find({ status: "active" });
+  return visitorType;
 };
 
-//----------------------------------CREATE Service--------------------------------------------
+// ─────────────────────────────────────────────────────────────
+// CREATE Services
+// ─────────────────────────────────────────────────────────────
 
-export const createEmployee = async (data: Record<string, any>) => {
+export const createEmployeeService = async (data: Record<string, any>) => {
   logger.info(
-    `[SERVICE]{master/master.service--createEmployee} createEmployee requested`,
+    `[SERVICE]{master/master.service--createEmployee} createEmployee requested`
   );
-  const newEmployee = await Employee.create(data);
+  const newEmployee = await Employee.create({
+    ...data,
+    status: EmployeeStatus.ACTIVE,
+  });
   return newEmployee;
 };
 
-export const createPurpose = async (data: Record<string, any>) => {
+export const createPurposeService = async (data: Record<string, any>) => {
   logger.info(
-    `[SERVICE]{master/master.service--createPurpose} createPurpose requested`,
+    `[SERVICE]{master/master.service--createPurpose} createPurpose requested`
   );
-  const newPurpose = await Purpose.create(data);
+  const newPurpose = await Purpose.create({
+    ...data,
+    status: PurposeStatus.ACTIVE,
+  });
   return newPurpose;
 };
 
-export const createCarryWithItem = async (data: Record<string, any>) => {
+export const createCarryWithItemService = async (data: Record<string, any>) => {
   logger.info(
-    `[SERVICE]{master/master.service--createCarryWithItem} createCarryWithItem requested`,
+    `[SERVICE]{master/master.service--createCarryWithItem} createCarryWithItem requested`
   );
-  const newCarryItem = await CarryWith.create(data);
+  const newCarryItem = await CarryWith.create({
+    ...data,
+    status: CarryStatus.ACTIVE,
+  });
   return newCarryItem;
 };
 
-export const createVisitingArea = async (data: Record<string, any>) => {
+export const createVisitingAreaService = async (data: Record<string, any>) => {
   logger.info(
-    `[SERVICE]{master/master.service--createVisitingArea} createVisitingArea requested`,
+    `[SERVICE]{master/master.service--createVisitingArea} createVisitingArea requested`
   );
-  const newVisitingArea = await VisitingArea.create(data);
+  const newVisitingArea = await VisitingArea.create({
+    ...data,
+    status: AreaStatus.ACTIVE,
+  });
   return newVisitingArea;
 };
 
-export const createVisitorType = async (data: Record<string, any>) => {
+export const createVisitorTypeService = async (data: Record<string, any>) => {
   logger.info(
-    `[SERVICE]{master/master.service--createVisitorType} createVisitorType requested`,
+    `[SERVICE]{master/master.service--createVisitorType} createVisitorType requested`
   );
-  const newVisitorType = await VisitorType.create(data);
+  const newVisitorType = await VisitorType.create({
+    ...data,
+    status: VisitorStatus.ACTIVE,
+  });
   return newVisitorType;
 };
 
-//------------------------------------------UPDATE Service---------------------------------------------------------
+// ─────────────────────────────────────────────────────────────
+// UPDATE Services
+// ─────────────────────────────────────────────────────────────
 
-export const updateEmployee = async (
-  employeeId: String,
-  data: Record<string, any>,
+export const updateEmployeeService = async (
+  employeeId: string,
+  data: Record<string, any>
 ) => {
   logger.info(
-    `[SERVICE]{master/master.service --updateEmployee} updateEmployee requested for ID: ${employeeId}`,
+    `[SERVICE]{master/master.service--updateEmployee} updateEmployee requested for ID: ${employeeId}`
   );
-  const exist = Employee.findById(employeeId);
+  // BUG FIX: was missing await, so the existence check never actually executed
+  const exist = await Employee.findById(employeeId);
   if (!exist) {
     throw new AppError("Employee not found", 404, "NOT_FOUND");
   }
-  const employee = await Employee.findByIdAndUpdate(employeeId, { $set: data });
+  const employee = await Employee.findByIdAndUpdate(
+    employeeId,
+    { $set: data },
+    { new: true }
+  );
   return employee;
 };
-export const updatepurpose = async (
-  purposeId: String,
-  data: Record<string, any>,
+
+export const updatepurposeService = async (
+  purposeId: string,
+  data: Record<string, any>
 ) => {
   logger.info(
-    `[SERVICE]{master/master.service --updatepurpose} updatepurpose requested for ID: ${purposeId}`,
+    `[SERVICE]{master/master.service--updatePurpose} updatePurpose requested for ID: ${purposeId}`
   );
-  const exist = Purpose.findById(purposeId);
+  // BUG FIX: was missing await, so the existence check never actually executed
+  const exist = await Purpose.findById(purposeId);
   if (!exist) {
     throw new AppError("Purpose not found", 404, "NOT_FOUND");
   }
-  const purpose = await Purpose.findByIdAndUpdate(purposeId, { $set: data });
+  const purpose = await Purpose.findByIdAndUpdate(
+    purposeId,
+    { $set: data },
+    { new: true }
+  );
   return purpose;
 };
-export const updateCarrywith = async (
-  itemId: String,
-  data: Record<string, any>,
+
+export const updateCarrywithService = async (
+  itemId: string,
+  data: Record<string, any>
 ) => {
   logger.info(
-    `[SERVICE]{master/master.service --updateCarrywith} updateCarrywith requested for ID: ${itemId}`,
+    `[SERVICE]{master/master.service--updateCarryWith} updateCarryWith requested for ID: ${itemId}`
   );
-  const exist = CarryWith.findById(itemId);
+  // BUG FIX: was missing await, so the existence check never actually executed
+  const exist = await CarryWith.findById(itemId);
   if (!exist) {
-    throw new AppError("Carry With Item not found", 404, "NOT_FOUND");
+    throw new AppError("Carry With item not found", 404, "NOT_FOUND");
   }
-  const item = await CarryWith.findByIdAndUpdate(itemId, { $set: data });
+  const item = await CarryWith.findByIdAndUpdate(
+    itemId,
+    { $set: data },
+    { new: true }
+  );
   return item;
 };
-export const updateVisitingArea = async (
-  areaId: String,
-  data: Record<string, any>,
+
+export const updateVisitingAreaService = async (
+  areaId: string,
+  data: Record<string, any>
 ) => {
   logger.info(
-    `[SERVICE]{master/master.service --updateVisitingArea} updateVisitingArea requested for ID: ${areaId}`,
+    `[SERVICE]{master/master.service--updateVisitingArea} updateVisitingArea requested for ID: ${areaId}`
   );
-  const exist = VisitingArea.findById(areaId);
+  // BUG FIX: was missing await, so the existence check never actually executed
+  const exist = await VisitingArea.findById(areaId);
   if (!exist) {
-    throw new AppError("Area not found", 404, "NOT_FOUND");
+    throw new AppError("Visiting area not found", 404, "NOT_FOUND");
   }
-  const area = await VisitingArea.findByIdAndUpdate(areaId, { $set: data });
+  const area = await VisitingArea.findByIdAndUpdate(
+    areaId,
+    { $set: data },
+    { new: true }
+  );
   return area;
 };
-export const updateVisitortype = async (
-  visitorId: String,
-  data: Record<string, any>,
+
+export const updateVisitortypeService = async (
+  visitorId: string,
+  data: Record<string, any>
 ) => {
   logger.info(
-    `[SERVICE]{master/master.service --updateVisitortype} updateVisitortype requested for ID: ${visitorId}`,
+    `[SERVICE]{master/master.service--updateVisitorType} updateVisitorType requested for ID: ${visitorId}`
   );
   const exist = await VisitorType.findById(visitorId);
   if (!exist) {
-    throw new AppError("Visitor Type not found", 404, "NOT_FOUND");
+    throw new AppError("Visitor type not found", 404, "NOT_FOUND");
   }
-  const employee = VisitorType.findByIdAndUpdate(visitorId, { $set: data });
-  return employee;
+  // BUG FIX: was missing await, so the updated document was never returned
+  const visitorType = await VisitorType.findByIdAndUpdate(
+    visitorId,
+    { $set: data },
+    { new: true }
+  );
+  return visitorType;
 };
 
-//----------------------------------------------DELETE Service-------------------------------------------------------------------------------
+// ─────────────────────────────────────────────────────────────
+// DELETE Services
+// ─────────────────────────────────────────────────────────────
 
-export const delteEmployee = async (employeeId: String) => {
+export const delteEmployeeService = async (employeeId: string) => {
   logger.info(
-    `[SERVICE]{master/master.service --deleteEmployee} deleteEmployee requested for ID: ${employeeId}`,
+    `[SERVICE]{master/master.service--deleteEmployee} deleteEmployee requested for ID: ${employeeId}`
   );
   const exist = await Employee.findById(employeeId);
   if (!exist) {
     throw new AppError("Employee not found", 404, "NOT_FOUND");
   }
-  if (exist && exist.status === "deleted") {
-    throw new AppError("Account is already deleted", 409, "CONFLICT");
+  if (exist.status === "deleted") {
+    throw new AppError("Employee is already deleted", 409, "CONFLICT");
   }
   const employee = await Employee.findOneAndDelete({ _id: employeeId });
   return employee;
 };
-export const deletePurpose = async (purposeId: String) => {
+
+export const deletePurposeService = async (purposeId: string) => {
   logger.info(
-    `[SERVICE]{master/master.service --deleteEmployee} deleteEmployee requested for ID: ${purposeId}`,
+    `[SERVICE]{master/master.service--deletePurpose} deletePurpose requested for ID: ${purposeId}`
   );
   const exist = await Purpose.findById(purposeId);
   if (!exist) {
     throw new AppError("Purpose not found", 404, "NOT_FOUND");
   }
-  if (exist && exist.status === "deleted") {
+  if (exist.status === "deleted") {
     throw new AppError("Purpose is already deleted", 409, "CONFLICT");
   }
   const purpose = await Purpose.findOneAndDelete({ _id: purposeId });
   return purpose;
 };
-export const deleteCarryWith = async (itemId: String) => {
+
+export const deleteCarryWithService = async (itemId: string) => {
   logger.info(
-    `[SERVICE]{master/master.service --deleteEmployee} deleteEmployee requested for ID: ${itemId}`,
+    `[SERVICE]{master/master.service--deleteCarryWith} deleteCarryWith requested for ID: ${itemId}`
   );
   const exist = await CarryWith.findById(itemId);
   if (!exist) {
-    throw new AppError("Item not found", 404, "NOT_FOUND");
+    throw new AppError("Carry-with item not found", 404, "NOT_FOUND");
   }
-  if (exist && exist.status === "deleted") {
-    throw new AppError("Item is already deleted", 409, "CONFLICT");
+  if (exist.status === "deleted") {
+    throw new AppError("Carry-with item is already deleted", 409, "CONFLICT");
   }
-  const carrywith = await CarryWith.findOneAndDelete({ _id: itemId });
-  return carrywith;
+  const carryWith = await CarryWith.findOneAndDelete({ _id: itemId });
+  return carryWith;
 };
-export const deleteVisitorArea = async (areaId: String) => {
+
+export const deleteVisitorAreaService = async (areaId: string) => {
   logger.info(
-    `[SERVICE]{master/master.service --deleteEmployee} deleteEmployee requested for ID: ${areaId}`,
+    `[SERVICE]{master/master.service--deleteVisitingArea} deleteVisitingArea requested for ID: ${areaId}`
   );
+  // BUG FIX: error message said "Employee not found" instead of "Visiting area not found"
   const exist = await VisitingArea.findById(areaId);
   if (!exist) {
-    throw new AppError("Employee not found", 404, "NOT_FOUND");
+    throw new AppError("Visiting area not found", 404, "NOT_FOUND");
   }
-  if (exist && exist.status === "deleted") {
-    throw new AppError("Account is already deleted", 409, "CONFLICT");
+  // BUG FIX: error message said "Account is already deleted" instead of entity-specific message
+  if (exist.status === "deleted") {
+    throw new AppError("Visiting area is already deleted", 409, "CONFLICT");
   }
   const area = await VisitingArea.findOneAndDelete({ _id: areaId });
   return area;
 };
-export const deleteVisitorType = async (visitorId: String) => {
+
+export const deleteVisitorTypeService = async (visitorId: string) => {
   logger.info(
-    `[SERVICE]{master/master.service --deleteEmployee} deleteEmployee requested for ID: ${visitorId}`,
+    `[SERVICE]{master/master.service--deleteVisitorType} deleteVisitorType requested for ID: ${visitorId}`
   );
+  // BUG FIX: error message said "Employee not found" instead of "Visitor type not found"
   const exist = await VisitorType.findById(visitorId);
   if (!exist) {
-    throw new AppError("Employee not found", 404, "NOT_FOUND");
+    throw new AppError("Visitor type not found", 404, "NOT_FOUND");
   }
-  if (exist && exist.status === "deleted") {
-    throw new AppError("Account is already deleted", 409, "CONFLICT");
+  // BUG FIX: error message said "Account is already deleted" instead of entity-specific message
+  if (exist.status === "deleted") {
+    throw new AppError("Visitor type is already deleted", 409, "CONFLICT");
   }
   const visitor = await VisitorType.findOneAndDelete({ _id: visitorId });
   return visitor;

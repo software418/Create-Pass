@@ -1,23 +1,26 @@
 import mongoose, { Schema } from "mongoose";
-import { required } from "zod/mini";
-
+export const STATUS = {
+  ACTIVE: "active",
+  BLOCK: "blocked",
+  DELETE: "deleted",
+};
 const VisitorTypeSchema = new Schema({
   name: {
     type: String,
     required: true,
   },
-  code: {
-    type: Number,
+  description: {
+    type: String,
     required: true,
   },
   status: {
     type: String,
-    enum: ["active", "blocked","deleted"],
-    default: "active",
+    enum: Object.values(STATUS),
+    default: STATUS,
   },
 });
 
-VisitorTypeSchema.index({status:1});
-VisitorTypeSchema.index({code:1, status:1});
+VisitorTypeSchema.index({ status: 1 });
+VisitorTypeSchema.index({ code: 1, status: 1 });
 
 export const VisitorType = mongoose.model("VisitorType", VisitorTypeSchema);

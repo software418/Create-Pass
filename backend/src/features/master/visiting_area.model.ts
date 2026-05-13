@@ -1,22 +1,30 @@
 import mongoose, { Schema } from "mongoose";
-
+export const STATUS = {
+  ACTIVE: "active",
+  BLOCK: "blocked",
+  DELETE: "deleted",
+};
 const VisitingAreaSchema = new Schema({
   name: {
     type: String,
     required: true,
   },
-  code: {
-    type: Number,
+  floor: {
+    type: String,
+    required: true,
+  },
+   description: {
+    type: String,
     required: true,
   },
   status: {
     type: String,
-    enum: ["active", "blocked","deleted"],
-    default: "active",
+    enum: Object.values(STATUS),
+    default: STATUS,
   },
 });
 
-VisitingAreaSchema.index({status:1});
-VisitingAreaSchema.index({code: 1,status:1});
+VisitingAreaSchema.index({ status: 1 });
+VisitingAreaSchema.index({ code: 1, status: 1 });
 
 export const VisitingArea = mongoose.model("VisitingArea", VisitingAreaSchema);

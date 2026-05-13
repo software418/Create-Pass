@@ -1,22 +1,26 @@
 import mongoose, { Schema } from "mongoose";
-
+export const STATUS = {
+  ACTIVE: "active",
+  BLOCK: "blocked",
+  DELETE: "deleted",
+};
 const PurposeSchema = new Schema({
   name: {
     type: String,
     required: true,
   },
-  code: {
-    type: Number,
+  description: {
+    type: String,
     required: true,
   },
   status: {
     type: String,
-    enum: ["active", "blocked","deleted"],
-    default: "active",
+    enum: Object.values(STATUS),
+    default: STATUS,
   },
 });
 
-PurposeSchema.index({status: 1});
-PurposeSchema.index({code:1, status:1});
+PurposeSchema.index({ status: 1 });
+PurposeSchema.index({ code: 1, status: 1 });
 
 export const Purpose = mongoose.model("Purpose", PurposeSchema);

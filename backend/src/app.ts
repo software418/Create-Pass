@@ -8,8 +8,9 @@ import { apiLimiter } from "./middleware/ratelimit.middleware";
 import morgan from "morgan";
 import logger from "./utils/logger.utils";
 import  errorHandler  from "./middleware/errorHandler";
-import authRoutes from "./features/auth/auth.routes";
+// import authRoutes from "./features/auth/auth.routes";
 import captureRoutes from "./features/gate_pass/gp.routes";
+import masterRoutes from "./features/master/master.routes"
 
 const app = express();
 
@@ -47,8 +48,10 @@ app.use(
 logger.info(`Routing requested`);
 
 // 2. ROUTES
-app.use("/api/v1/auth", authRoutes);
+// app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/capture", captureRoutes);
+app.use("/api/v1/master", masterRoutes);
+
 
 // 3. ERROR HANDLING MIDDLEWARE
 app.use(errorHandler);
