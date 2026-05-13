@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
-import { Button } from "../shared/ui/atoms/Button";
-import { Checkbox } from "../shared/ui/atoms/Checkbox";
-import { FormField } from "../shared/ui/molecules/FormField";
-import { Input } from "../shared/ui/atoms/Input";
-import axios from "axios";
+import { Button } from "@/shared/ui/atoms/Button";
+import { Checkbox } from "@/shared/ui/atoms/Checkbox";
+import { FormField } from "@/shared/ui/molecules/FormField";
+import { Input } from "@/shared/ui/atoms/Input";
+// import axios from "axios";
+import { queryPost } from "@/shared/services/api";
+import { API_ENDPOINTS } from "@/shared/const/api";
 import { useLocation } from "@/shared/hooks/useLocation";
 import {
   Card,
@@ -12,7 +14,8 @@ import {
   CardTitle,
   CardContent,
 } from "../shared/ui/molecules/Card";
-import { CameraInput, type CameraInputHandle } from "../pages/CameraInput";
+import { CameraInput, type CameraInputHandle } from "@/pages/CameraInput";
+import { useEmployees } from "@/master/useEmployee";
 
 interface PersonDetail {
   name: string;
@@ -55,7 +58,7 @@ interface FormData {
 
 const INITIAL_FORM_DATA: FormData = {
   gatePassType: "single",
-  passDate: `${Date.now}`,
+  passDate: "",
   from: "",
   to: "",
   mobileNo: "",
@@ -106,6 +109,7 @@ const CreatePassPage: React.FC = () => {
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { employees } = useEmployees();
   const { states, cities, setSelectedState } = useLocation();
 
   const cameraInputRef = React.useRef<CameraInputHandle>(null);
@@ -211,6 +215,8 @@ const CreatePassPage: React.FC = () => {
       > = [
         "gatePassType",
         "passDate",
+        "from",
+        "to",
         "mobileNo",
         "name",
         "emailId",
@@ -261,10 +267,11 @@ const CreatePassPage: React.FC = () => {
       payload.append("photo", photoBlob, "visitor-photo.jpg");
 
       // 3. POST (let axios set Content-Type + boundary automatically)
-      const response = await axios.post(
-        "http://localhost:5000/api/v1/capture/upload",
-        payload,
-      );
+      // const response = await axios.post(
+      //   "http://localhost:5000/api/v1/capture/upload",
+      //   payload,
+      // );
+      const response = await queryPost(API_ENDPOINTS.UPLOAD, payload);
 
       console.log("API Response:", response.data);
       alert("Gate pass created successfully!");
@@ -283,8 +290,8 @@ const CreatePassPage: React.FC = () => {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen .bg-surface">
-      <Card className="max-w-6xl mx-auto shadow-lg .bg-surface">
+    <div className="min-h-screen bg-surface">
+      <Card className="max-w-6xl mx-auto shadow-lg bg-surface">
         <CardHeader>
           <CardTitle>Create Gate Pass</CardTitle>
         </CardHeader>
@@ -484,11 +491,12 @@ const CreatePassPage: React.FC = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border-b-2 border-gray-300 focus:border-red-600 focus:outline-none bg-white"
                 >
-                  <option value="">Select</option>
-                  <option value="HR">HR Department</option>
-                  <option value="OPERATIONS">Operations</option>
-                  <option value="FINANCE">Finance</option>
-                  <option value="ADMIN">Admin</option>
+                  <option value="">Select </option>
+                  {employees.map((e: any) => (
+                    <option key={e._id} value={e._id}>
+                      {e.name}
+                    </option>
+                  ))}
                 </select>
               </FormField>
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {}
 
 export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(

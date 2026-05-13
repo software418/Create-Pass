@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { required } from "zod/mini";
 
 const PersonDetailSchema = new Schema(
   {
@@ -7,13 +8,15 @@ const PersonDetailSchema = new Schema(
     aadharNumber: { type: String, required: true },
     aadharFileUrl: { type: String, default: "" }, // URL set by the service after saving the file
   },
-  { _id: false }
+  { _id: false },
 );
 
 const FormDataSchema = new Schema(
   {
     gatePassType: { type: String, enum: ["single", "multi"], required: true },
     passDate: { type: Date, required: true },
+    from: { type: Date },
+    to: { type: Date },
     mobileNo: { type: String, required: true, index: true },
     name: { type: String, required: true },
     emailId: { type: String, required: true },
@@ -41,7 +44,7 @@ const FormDataSchema = new Schema(
     allowedHours: String,
     photoUrl: { type: String, default: "" }, // Visitor webcam photo URL
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const FormData = mongoose.model("FormData", FormDataSchema);

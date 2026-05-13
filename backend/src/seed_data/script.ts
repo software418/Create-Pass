@@ -4,9 +4,15 @@ import { Purpose } from "../features/master/purpose.model";
 import { CarryWith } from "../features/master/carry_with.model";
 import { VisitingArea } from "../features/master/visiting_area.model";
 import { VisitorType } from "../features/master/visitor_type.model";
+import logger from "../utils/logger.utils";
+import env from 'dotenv'
 
+env.config();
 // ─── Update this with your actual MongoDB connection string ───
-const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/GatePass" ;
+if(!process.env.MONGO_URI){
+ logger.info(`env variable is not readed`)
+}
+const MONGO_URI = process.env.MONGO_URI as string ;
 
 // ─────────────────────────────────────────────────────────────
 // VISITOR TYPE  (5 entries — naturally limited, like an enum)
