@@ -300,7 +300,7 @@ const CreatePassPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Gate Pass Type & Date */}
             <div className="grid grid-cols-2 gap-8">
-              <FormField label="Gate Pass Type">
+              <FormField label="Gate Pass Type" htmlFor="gatepass-type-single">
                 <div className="space-y-3">
                   {(["single", "multi"] as const).map((type) => (
                     <label
@@ -309,6 +309,7 @@ const CreatePassPage: React.FC = () => {
                     >
                       <input
                         type="radio"
+                        id={`gatepass-type-${type}`}
                         name="gatePassType"
                         value={type}
                         checked={formData.gatePassType === type}
@@ -323,9 +324,10 @@ const CreatePassPage: React.FC = () => {
                 </div>
               </FormField>
 
-              <FormField label="Pass Date">
+              <FormField label="Pass Date" htmlFor="pass-date">
                 <Input
                   type="date"
+                  id="pass-date"
                   name="passDate"
                   value={formData.passDate}
                   onChange={handleInputChange}
@@ -333,18 +335,20 @@ const CreatePassPage: React.FC = () => {
               </FormField>
               {formData.gatePassType === "multi" && (
                 <>
-                  <FormField label="From">
+                  <FormField label="From" htmlFor="from">
                     <Input
                       type="date"
+                      id="from"
                       name="from"
                       disabled={formData.gatePassType !== "multi"}
                       value={formData.from}
                       onChange={handleInputChange}
                     />
                   </FormField>
-                  <FormField label="To">
+                  <FormField label="To" htmlFor="to">
                     <Input
                       type="date"
+                      id="to"
                       name="to"
                       disabled={formData.gatePassType !== "multi"}
                       value={formData.to}
@@ -362,39 +366,45 @@ const CreatePassPage: React.FC = () => {
               </h3>
 
               <div className="grid grid-cols-2 gap-6">
-                <FormField label="Name">
+                <FormField label="Name" htmlFor="name">
                   <Input
                     type="text"
+                    id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
+                    autoComplete="name"
                     placeholder="Enter name"
                   />
                 </FormField>
-                <FormField label="Mobile No">
+                <FormField label="Mobile No" htmlFor="mobileNo">
                   <Input
                     type="tel"
+                    id="mobileNo"
                     name="mobileNo"
                     value={formData.mobileNo}
                     onChange={handleInputChange}
                     placeholder="Enter mobile number"
                   />
                 </FormField>
-                <FormField label="Email-Id">
+                <FormField label="Email-Id" htmlFor="Email-Id">
                   <Input
                     type="email"
+                    id="Email-Id"
                     name="emailId"
                     value={formData.emailId}
                     onChange={handleInputChange}
                     placeholder="Enter email"
                   />
                 </FormField>
-                <FormField label="Address">
+                <FormField label="Address" htmlFor="address">
                   <textarea
                     name="address"
+                    id="address"
                     value={formData.address}
                     onChange={handleInputChange}
                     placeholder="Enter address"
+                    autoComplete="adress"
                     className="w-full px-3 py-2 border-b-2 border-gray-300 focus:border-red-600 focus:outline-none resize-none"
                     rows={3}
                   />
@@ -402,9 +412,10 @@ const CreatePassPage: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-6">
-                <FormField label="Company Name">
+                <FormField label="Company Name" htmlFor="CompanyName">
                   <Input
                     type="text"
+                    id="CompanyName"
                     name="companyName"
                     value={formData.companyName}
                     onChange={handleInputChange}
@@ -414,9 +425,10 @@ const CreatePassPage: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-6">
-                <FormField label="State">
+                <FormField label="State" htmlFor="state">
                   <select
                     name="state"
+                    id="state"
                     value={formData.state}
                     onChange={handleStateChange}
                     className="w-full px-3 py-2 border-b-2 border-gray-300
@@ -431,9 +443,10 @@ const CreatePassPage: React.FC = () => {
                   </select>
                 </FormField>
 
-                <FormField label="City">
+                <FormField label="City" htmlFor="city">
                   <select
                     name="city"
+                    id="city"
                     value={formData.city}
                     disabled={!formData.state}
                     onChange={handleInputChange}
@@ -452,9 +465,10 @@ const CreatePassPage: React.FC = () => {
 
             {/* Visitor Details */}
             <div className="grid grid-cols-2 gap-6">
-              <FormField label="Representing Visitor Type">
+              <FormField label="Representing Visitor Type" htmlFor="representingVisitorType">
                 <select
                   name="representingVisitorType"
+                  id="representingVisitorType"
                   value={formData.representingVisitorType}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border-b-2 border-gray-300 focus:border-red-600 focus:outline-none bg-white"
@@ -468,9 +482,10 @@ const CreatePassPage: React.FC = () => {
                 </select>
               </FormField>
 
-              <FormField label="Sub Location">
+              <FormField label="Sub Location" htmlFor="subLocation">
                 <select
                   name="subLocation"
+                  id="subLocation"
                   value={formData.subLocation}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border-b-2 border-gray-300 focus:border-red-600 focus:outline-none bg-white"
@@ -484,9 +499,10 @@ const CreatePassPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-6">
-              <FormField label="To Meet with Employee">
+              <FormField label="To Meet with Employee" htmlFor="toMeetWith">
                 <select
                   name="toMeetWith"
+                  id="toMeetWith"
                   value={formData.toMeetWith}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border-b-2 border-gray-300 focus:border-red-600 focus:outline-none bg-white"
@@ -500,7 +516,7 @@ const CreatePassPage: React.FC = () => {
                 </select>
               </FormField>
 
-              <FormField label="Carry With">
+              <FormField label="Carry With" htmlFor="carryWith">
                 <div className="space-y-2">
                   {(["mobile", "laptop", "pendrive", "camera"] as const).map(
                     (item) => (
@@ -511,6 +527,7 @@ const CreatePassPage: React.FC = () => {
                         <Checkbox
                           checked={formData.carryWith[item]}
                           onChange={(e) => handleCheckboxChange(e, item)}
+                          id="carryWith"
                           value={item}
                         />
                         <span className="ml-2 text-sm uppercase">{item}</span>
@@ -523,9 +540,10 @@ const CreatePassPage: React.FC = () => {
 
             {/* ID Details */}
             <div className="grid grid-cols-2 gap-6 border-t-2 border-gray-200 pt-6">
-              <FormField label="ID Type">
+              <FormField label="ID Type" htmlFor="idType">
                 <select
                   name="idType"
+                  id="idType"
                   value={formData.idType}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border-b-2 border-gray-300 focus:border-red-600 focus:outline-none bg-white"
@@ -537,10 +555,11 @@ const CreatePassPage: React.FC = () => {
                 </select>
               </FormField>
 
-              <FormField label="Id Number">
+              <FormField label="Id Number" htmlFor="idNumber">
                 <Input
                   type="text"
                   name="idNumber"
+                  id="idNumber"
                   value={formData.idNumber}
                   onChange={handleInputChange}
                   placeholder="Enter ID number"
@@ -550,9 +569,10 @@ const CreatePassPage: React.FC = () => {
 
             {/* Description & Covid */}
             <div className="grid grid-cols-2 gap-6">
-              <FormField label="Description">
+              <FormField label="Description" htmlFor="description">
                 <textarea
                   name="description"
+                  id="description"
                   value={formData.description}
                   onChange={handleInputChange}
                   placeholder="Enter description"
@@ -562,7 +582,7 @@ const CreatePassPage: React.FC = () => {
               </FormField>
 
               <div className="space-y-4">
-                <FormField label="Mask/Covid Certificate">
+                <FormField label="Mask/Covid Certificate" htmlFor="maskCovid">
                   <div className="space-y-2">
                     {(["yes", "no"] as const).map((val) => (
                       <label
@@ -571,6 +591,7 @@ const CreatePassPage: React.FC = () => {
                       >
                         <input
                           type="radio"
+                          id="maskCovid"
                           name="maskCovid"
                           value={val}
                           checked={formData.maskCovid === val}
@@ -583,9 +604,10 @@ const CreatePassPage: React.FC = () => {
                   </div>
                 </FormField>
 
-                <FormField label="No of Person">
+                <FormField label="No of Person" htmlFor="noOfPerson">
                   <Input
                     type="number"
+                    id="noOfPerson"
                     name="noOfPerson"
                     value={formData.noOfPerson}
                     onChange={handleInputChange}
@@ -604,24 +626,52 @@ const CreatePassPage: React.FC = () => {
               {formData.persons.map((person, index) => (
                 <div key={index} className="mb-6 p-4 bg-gray-50 rounded-lg">
                   <div className="grid grid-cols-4 gap-4">
-                    <FormField label="Person Name">
+                    {/* Person Name Input */}
+                    {/* FIX: Append -${index} to ensure each row gets an isolated unique label hook */}
+                    <FormField
+                      label="Person Name"
+                      htmlFor={`person-name-${index}`}
+                    >
                       <Input
+                        id={`person-name-${index}`} // 👈 Safe, unique ID per row
+                        name={`person[${index}].name`} // 👈 Standard array syntax structure hint for browsers
+                        type="text"
+                        autoComplete="name"
                         value={person.name}
                         onChange={(e) =>
                           handlePersonChange(index, "name", e.target.value)
                         }
                       />
                     </FormField>
-                    <FormField label="Person Phone No">
+
+                    {/* Person Phone Input */}
+                    <FormField
+                      label="Person Phone No"
+                      htmlFor={`person-phone-${index}`}
+                    >
                       <Input
+                        id={`person-phone-${index}`}
+                        name={`person[${index}].phoneNo`}
+                        type="tel"
+                        autoComplete="tel"
                         value={person.phoneNo}
                         onChange={(e) =>
                           handlePersonChange(index, "phoneNo", e.target.value)
                         }
                       />
                     </FormField>
-                    <FormField label="Aadhar Number">
+
+                    {/* Aadhar Number Input */}
+                    <FormField
+                      label="Aadhar Number"
+                      htmlFor={`person-aadhar-${index}`}
+                    >
                       <Input
+                        id={`person-aadhar-${index}`}
+                        name={`person[${index}].aadharNumber`}
+                        type="text"
+                        // Disables autocomplete tracking specifically for custom internal identifiers
+                        autoComplete="off"
                         value={person.aadharNumber}
                         onChange={(e) =>
                           handlePersonChange(
@@ -632,11 +682,15 @@ const CreatePassPage: React.FC = () => {
                         }
                       />
                     </FormField>
-                    <FormField label="Aadhar File">
+
+                    {/* Aadhar File Picker Input */}
+                    {/* Your file configuration block already handles the index string cleanly! */}
+                    <FormField label="Aadhar File" htmlFor={`file-${index}`}>
                       <div className="flex items-center gap-2">
                         <input
                           type="file"
                           id={`file-${index}`}
+                          name={`person[${index}].aadharFile`}
                           className="hidden"
                           accept="image/*,.pdf"
                           onChange={(e) =>
@@ -702,9 +756,10 @@ const CreatePassPage: React.FC = () => {
 
             {/* Purpose & Hours */}
             <div className="grid grid-cols-2 gap-6 border-t-2 border-gray-200 pt-6">
-              <FormField label="Purpose">
+              <FormField label="Purpose" htmlFor="purpose">
                 <select
                   name="purpose"
+                  id="purpose"
                   value={formData.purpose}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border-b-2 border-gray-300 outline-none"
@@ -714,9 +769,10 @@ const CreatePassPage: React.FC = () => {
                   <option value="MEETING">MEETING</option>
                 </select>
               </FormField>
-              <FormField label="Allowed Hours">
+              <FormField label="Allowed Hours" htmlFor="allowedHours">
                 <Input
                   name="allowedHours"
+                  id="allowedHours"
                   value={formData.allowedHours}
                   onChange={handleInputChange}
                 />
