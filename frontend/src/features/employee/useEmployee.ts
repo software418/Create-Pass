@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { IEmployee, EmployeePayload } from '../master/types';
+import type { IEmployee, EmployeePayload } from '@/master/types';
 import { getApiError } from '@/shared/services/ApiClient';
 import { 
   getEmployee, 
@@ -20,7 +20,8 @@ export const useEmployees = () => {
     try {
       const data = await getEmployee();
       // Ensure data fallback to an array if API payload wraps it uniquely
-      setEmployees(Array.isArray(data) ? data : data.employees || []);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setEmployees(Array.isArray(data) ? data : (data as any).employees || []);
     } catch (err) {
       getApiError(err,'Failed to fetch employees. Please try again.');
     } finally {

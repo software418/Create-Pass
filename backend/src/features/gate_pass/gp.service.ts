@@ -21,7 +21,6 @@ export const processForm = async (
     const photoUrl = `/uploads/${photoFileName}`;
 
     // ── Parse JSON-encoded fields sent from multipart FormData ─────────────
-    // Frontend sends carryWith and visitArea as JSON strings
     let carryWith = data.carryWith;
     let visitArea = data.visitArea;
     let persons = data.persons;
@@ -29,30 +28,27 @@ export const processForm = async (
     try {
       carryWith =
         typeof carryWith === "string" ? JSON.parse(carryWith) : carryWith;
+      if (!Array.isArray(carryWith)) carryWith = [];
     } catch {
-      carryWith = {
-        mobile: false,
-        laptop: false,
-        pendrive: false,
-        camera: false,
-      };
+      carryWith = [];
     }
 
     try {
       visitArea =
         typeof visitArea === "string" ? JSON.parse(visitArea) : visitArea;
+      if (!Array.isArray(visitArea)) visitArea = [];
     } catch {
       visitArea = [];
     }
 
     try {
       persons = typeof persons === "string" ? JSON.parse(persons) : persons;
+      if (!Array.isArray(persons)) persons = [];
     } catch {
       persons = [];
     }
 
     // ── Save each person's aadhar file and attach URL to person record ──────
-    // Frontend sends them as aadharFile_0, aadharFile_1, …
     const personsWithFileUrls = (persons as any[]).map(
       (person: any, index: number) => {
         const aadharFile = aadharFiles[index];
@@ -73,7 +69,7 @@ export const processForm = async (
       visitArea,
       persons: personsWithFileUrls,
       noOfPerson: Number(data.noOfPerson) || 0,
-      photoUrl, // store visitor photo URL
+      photoUrl,
     });
 
     logger.info(`Gate pass created: ${pass._id}`);

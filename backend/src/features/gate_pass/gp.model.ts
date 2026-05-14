@@ -27,12 +27,7 @@ const FormDataSchema = new Schema(
     representingVisitorType: String,
     subLocation: String,
     toMeetWith: String,
-    carryWith: {
-      mobile: { type: Boolean, default: false },
-      laptop: { type: Boolean, default: false },
-      pendrive: { type: Boolean, default: false },
-      camera: { type: Boolean, default: false },
-    },
+    carryWith: { type: [String], default: [] },
     idType: String,
     idNumber: String,
     description: String,

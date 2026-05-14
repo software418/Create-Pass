@@ -7,7 +7,7 @@ import { Avatar } from '../ui/atoms/Avatar';
 
 export const DashboardLayout = () => {
   return (
-    <div className="flex min-h-screen flex-col bg-surface">
+    <div className="flex h-screen w-screen flex-col bg-surface overflow-hidden">
       <Navbar>
         <div className="flex flex-1 items-center justify-between">
           <div className="font-bold text-xl tracking-tight text-primary">VMS</div>
@@ -20,7 +20,7 @@ export const DashboardLayout = () => {
         </div>
       </Navbar>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 h-[calc(100vh-64px)] overflow-hidden">
         <Sidebar>
           <Link to="/create-pass"><SidebarItem icon={FilePlus } label="Create Pass" /></Link>
           <Link to="/employee-config"><SidebarItem icon={UserRoundCog } label="Employee" /></Link>

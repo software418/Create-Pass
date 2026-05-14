@@ -4,7 +4,6 @@ import { Button } from "@/shared/ui/atoms/Button";
 import { Checkbox } from "@/shared/ui/atoms/Checkbox";
 import { FormField } from "@/shared/ui/molecules/FormField";
 import { Input } from "@/shared/ui/atoms/Input";
-// import axios from "axios";
 import { queryPost } from "@/shared/services/api";
 import { API_ENDPOINTS } from "@/shared/const/api";
 import { useLocation } from "@/shared/hooks/useLocation";
@@ -15,7 +14,11 @@ import {
   CardContent,
 } from "../shared/ui/molecules/Card";
 import { CameraInput, type CameraInputHandle } from "@/pages/CameraInput";
-import { useEmployees } from "@/master/useEmployee";
+import { useEmployees } from "@/features/employee/useEmployee";
+import { usePurpose } from "@/features/purpose/usePurpose";
+import { useCarryWith } from "@/features/carry_with/useCarrywith";
+import { useVisitorArea } from "@/features/visitor_area/useVisitorArea";
+import { useVisitorType } from "@/features/visitor_type/useVisitorType";
 
 interface PersonDetail {
   name: string;
@@ -39,12 +42,7 @@ interface FormData {
   representingVisitorType: string;
   subLocation: string;
   toMeetWith: string;
-  carryWith: {
-    mobile: boolean;
-    laptop: boolean;
-    pendrive: boolean;
-    camera: boolean;
-  };
+  carryWith: string[];
   idType: string;
   idNumber: string;
   description: string;
@@ -71,12 +69,7 @@ const INITIAL_FORM_DATA: FormData = {
   representingVisitorType: "",
   subLocation: "",
   toMeetWith: "",
-  carryWith: {
-    mobile: false,
-    laptop: false,
-    pendrive: false,
-    camera: false,
-  },
+  carryWith: [],
   idType: "PASSPORT",
   idNumber: "",
   description: "",
@@ -88,29 +81,17 @@ const INITIAL_FORM_DATA: FormData = {
   allowedHours: "",
 };
 
-const visitAreaOptions = [
-  "CPVC PLANT",
-  "CA 1 PLANT",
-  "STORE AREA",
-  "H2O2 AREA",
-  "OCD BLOCK",
-  "CT PROJECT AREA",
-  "ECH PLANT",
-  "SECURITY BLOCK",
-  "CA 2 PLANT",
-  "CPP (POWER PLANT)",
-  "SAFETY BLOCK",
-  "CMS PLANT",
-  "H2O2 PLANT",
-  "ADMIN_BLOCK",
-];
-
 const CreatePassPage: React.FC = () => {
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { employees } = useEmployees();
   const { states, cities, setSelectedState } = useLocation();
+
+  const { employees } = useEmployees();
+  const { carryWith } = useCarryWith();
+  const { purposes } = usePurpose();
+  const { visitorArea } = useVisitorArea();
+  const { visitorType } = useVisitorType();
 
   const cameraInputRef = React.useRef<CameraInputHandle>(null);
 
@@ -123,26 +104,6 @@ const CreatePassPage: React.FC = () => {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleCheckboxChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    category: keyof FormData["carryWith"] | "visitArea",
-  ) => {
-    const { value, checked } = e.target;
-    if (category === "visitArea") {
-      setFormData((prev) => ({
-        ...prev,
-        visitArea: checked
-          ? [...prev.visitArea, value]
-          : prev.visitArea.filter((item) => item !== value),
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        carryWith: { ...prev.carryWith, [category]: checked },
-      }));
-    }
   };
 
   const handlePersonChange = (
@@ -178,21 +139,18 @@ const CreatePassPage: React.FC = () => {
     setFormData(INITIAL_FORM_DATA);
     cameraInputRef.current?.resetCamera();
   };
+
   const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-
-    // 1. Tell the hook to filter cities
     setSelectedState(value);
-
-    // 2. Update your main form data
     setFormData((prev) => ({
       ...prev,
       state: value,
-      city: "", // Important: Reset city when state changes
+      city: "",
     }));
   };
-  // ── Submit ─────────────────────────────────────────────────────────────────
 
+  // ── Submit ─────────────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -211,7 +169,7 @@ const CreatePassPage: React.FC = () => {
 
       // ── Scalar fields ──────────────────────────────────────────────────────
       const scalarFields: Array<
-        keyof Omit<FormData, "carryWith" | "visitArea" | "persons">
+        keyof Omit<FormData, "persons" | "carryWith" | "visitArea">
       > = [
         "gatePassType",
         "passDate",
@@ -240,19 +198,18 @@ const CreatePassPage: React.FC = () => {
         payload.append(key, formData[key] as string);
       });
 
-      // ── Object / array fields (JSON-encode so backend can parse) ───────────
+      // ── carryWith & visitArea: string[] → JSON string ──────────────────────
       payload.append("carryWith", JSON.stringify(formData.carryWith));
       payload.append("visitArea", JSON.stringify(formData.visitArea));
 
       // ── Persons: send metadata as JSON + each file separately ──────────────
-      // Strip File objects from the JSON — files travel as binary fields below
       const personsMetadata = formData.persons.map(
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         ({ aadharFile: _, ...rest }) => rest,
       );
       payload.append("persons", JSON.stringify(personsMetadata));
 
-      // Append each person's aadhar file with a predictable key: aadharFile_0, aadharFile_1 …
+      // Append each person's aadhar file with a predictable key
       formData.persons.forEach((person, index) => {
         if (person.aadharFile) {
           payload.append(
@@ -266,11 +223,7 @@ const CreatePassPage: React.FC = () => {
       // ── Camera photo ───────────────────────────────────────────────────────
       payload.append("photo", photoBlob, "visitor-photo.jpg");
 
-      // 3. POST (let axios set Content-Type + boundary automatically)
-      // const response = await axios.post(
-      //   "http://localhost:5000/api/v1/capture/upload",
-      //   payload,
-      // );
+      // 3. POST
       const response = await queryPost(API_ENDPOINTS.UPLOAD, payload);
 
       console.log("API Response:", response.data);
@@ -286,6 +239,91 @@ const CreatePassPage: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+  // const handleSubmit = async (e: React.FormEvent) =>
+  // {
+  //   e.preventDefault();
+  //   setIsSubmitting(true);
+
+  //   try {
+  //     // 1. Capture photo
+  //     const photoBlob = await cameraInputRef.current?.takePhoto();
+  //     if (!photoBlob) {
+  //       alert("Please take a photo before submitting!");
+  //       setIsSubmitting(false);
+  //       return;
+  //     }
+
+  //     // 2. Build FormData
+  //     const payload = new FormData();
+
+  //     // ── Scalar fields ──────────────────────────────────────────────────────
+  //     const scalarFields: Array<keyof Omit<FormData, "persons">> = [
+  //       "gatePassType",
+  //       "passDate",
+  //       "from",
+  //       "to",
+  //       "mobileNo",
+  //       "name",
+  //       "emailId",
+  //       "companyName",
+  //       "address",
+  //       "state",
+  //       "city",
+  //       "representingVisitorType",
+  //       "subLocation",
+  //       "toMeetWith",
+  //       "carryWith",
+  //       "idType",
+  //       "idNumber",
+  //       "description",
+  //       "maskCovid",
+  //       "noOfPerson",
+  //       "visitArea",
+  //       "purpose",
+  //       "allowedHours",
+  //     ];
+
+  //     scalarFields.forEach((key) => {
+  //       payload.append(key, formData[key] as string);
+  //     });
+
+  //     // ── Persons: send metadata as JSON + each file separately ──────────────
+  //     const personsMetadata = formData.persons.map(
+  //       // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //       ({ aadharFile: _, ...rest }) => rest,
+  //     );
+  //     payload.append("persons", JSON.stringify(personsMetadata));
+
+  //     // Append each person's aadhar file with a predictable key
+  //     formData.persons.forEach((person, index) => {
+  //       if (person.aadharFile) {
+  //         payload.append(
+  //           `aadharFile_${index}`,
+  //           person.aadharFile,
+  //           person.aadharFile.name,
+  //         );
+  //       }
+  //     });
+
+  //     // ── Camera photo ───────────────────────────────────────────────────────
+  //     payload.append("photo", photoBlob, "visitor-photo.jpg");
+
+  //     // 3. POST
+  //     const response = await queryPost(API_ENDPOINTS.UPLOAD, payload);
+
+  //     console.log("API Response:", response.data);
+  //     alert("Gate pass created successfully!");
+  //     handleClear();
+  //   } catch (error: any) {
+  //     console.error("Submission error:", error);
+  //     alert(
+  //       error?.response?.data?.message ||
+  //         "Submission failed. Please try again.",
+  //     );
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -404,7 +442,7 @@ const CreatePassPage: React.FC = () => {
                     value={formData.address}
                     onChange={handleInputChange}
                     placeholder="Enter address"
-                    autoComplete="adress"
+                    autoComplete="address"
                     className="w-full px-3 py-2 border-b-2 border-gray-300 focus:border-red-600 focus:outline-none resize-none"
                     rows={3}
                   />
@@ -465,7 +503,10 @@ const CreatePassPage: React.FC = () => {
 
             {/* Visitor Details */}
             <div className="grid grid-cols-2 gap-6">
-              <FormField label="Representing Visitor Type" htmlFor="representingVisitorType">
+              <FormField
+                label="Representing Visitor Type"
+                htmlFor="representingVisitorType"
+              >
                 <select
                   name="representingVisitorType"
                   id="representingVisitorType"
@@ -473,12 +514,12 @@ const CreatePassPage: React.FC = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border-b-2 border-gray-300 focus:border-red-600 focus:outline-none bg-white"
                 >
-                  <option value="">Select</option>
-                  <option value="AUDITOR">AUDITOR</option>
-                  <option value="VENDOR">VENDOR</option>
-                  <option value="CONTRACTOR">CONTRACTOR</option>
-                  <option value="CONSULTANT">CONSULTANT</option>
-                  <option value="VISITOR">VISITOR</option>
+                  <option value="">Select Visitor Type</option>
+                  {visitorType.map((v: any) => (
+                    <option key={v._id} value={v.name}>
+                      {v.name}
+                    </option>
+                  ))}
                 </select>
               </FormField>
 
@@ -507,7 +548,7 @@ const CreatePassPage: React.FC = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border-b-2 border-gray-300 focus:border-red-600 focus:outline-none bg-white"
                 >
-                  <option value="">Select </option>
+                  <option value="">Select</option>
                   {employees.map((e: any) => (
                     <option key={e._id} value={e._id}>
                       {e.name}
@@ -518,22 +559,29 @@ const CreatePassPage: React.FC = () => {
 
               <FormField label="Carry With" htmlFor="carryWith">
                 <div className="space-y-2">
-                  {(["mobile", "laptop", "pendrive", "camera"] as const).map(
-                    (item) => (
-                      <label
-                        key={item}
-                        className="flex items-center cursor-pointer"
-                      >
-                        <Checkbox
-                          checked={formData.carryWith[item]}
-                          onChange={(e) => handleCheckboxChange(e, item)}
-                          id="carryWith"
-                          value={item}
-                        />
-                        <span className="ml-2 text-sm uppercase">{item}</span>
-                      </label>
-                    ),
-                  )}
+                  {carryWith.map((c: any) => (
+                    <label
+                      key={c._id}
+                      className="flex items-center cursor-pointer"
+                    >
+                      <Checkbox
+                        id={`carryWith-${c._id}`}
+                        value={c.value}
+                        checked={formData.carryWith.includes(c.name)}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            carryWith: e.target.checked
+                              ? [...prev.carryWith, c.name]
+                              : prev.carryWith.filter(
+                                  (item) => item !== c.name,
+                                ),
+                          }))
+                        }
+                      />
+                      <span className="ml-2 text-sm uppercase">{c.name}</span>
+                    </label>
+                  ))}
                 </div>
               </FormField>
             </div>
@@ -591,7 +639,7 @@ const CreatePassPage: React.FC = () => {
                       >
                         <input
                           type="radio"
-                          id="maskCovid"
+                          id={`maskCovid-${val}`}
                           name="maskCovid"
                           value={val}
                           checked={formData.maskCovid === val}
@@ -626,15 +674,13 @@ const CreatePassPage: React.FC = () => {
               {formData.persons.map((person, index) => (
                 <div key={index} className="mb-6 p-4 bg-gray-50 rounded-lg">
                   <div className="grid grid-cols-4 gap-4">
-                    {/* Person Name Input */}
-                    {/* FIX: Append -${index} to ensure each row gets an isolated unique label hook */}
                     <FormField
                       label="Person Name"
                       htmlFor={`person-name-${index}`}
                     >
                       <Input
-                        id={`person-name-${index}`} // 👈 Safe, unique ID per row
-                        name={`person[${index}].name`} // 👈 Standard array syntax structure hint for browsers
+                        id={`person-name-${index}`}
+                        name={`person[${index}].name`}
                         type="text"
                         autoComplete="name"
                         value={person.name}
@@ -644,7 +690,6 @@ const CreatePassPage: React.FC = () => {
                       />
                     </FormField>
 
-                    {/* Person Phone Input */}
                     <FormField
                       label="Person Phone No"
                       htmlFor={`person-phone-${index}`}
@@ -661,7 +706,6 @@ const CreatePassPage: React.FC = () => {
                       />
                     </FormField>
 
-                    {/* Aadhar Number Input */}
                     <FormField
                       label="Aadhar Number"
                       htmlFor={`person-aadhar-${index}`}
@@ -670,7 +714,6 @@ const CreatePassPage: React.FC = () => {
                         id={`person-aadhar-${index}`}
                         name={`person[${index}].aadharNumber`}
                         type="text"
-                        // Disables autocomplete tracking specifically for custom internal identifiers
                         autoComplete="off"
                         value={person.aadharNumber}
                         onChange={(e) =>
@@ -683,8 +726,6 @@ const CreatePassPage: React.FC = () => {
                       />
                     </FormField>
 
-                    {/* Aadhar File Picker Input */}
-                    {/* Your file configuration block already handles the index string cleanly! */}
                     <FormField label="Aadhar File" htmlFor={`file-${index}`}>
                       <div className="flex items-center gap-2">
                         <input
@@ -738,17 +779,24 @@ const CreatePassPage: React.FC = () => {
                 Visit Area
               </h3>
               <div className="grid grid-cols-3 gap-4">
-                {visitAreaOptions.map((area) => (
+                {visitorArea.map((v: any) => (
                   <label
-                    key={area}
+                    key={v._id}
                     className="flex items-center cursor-pointer"
                   >
                     <Checkbox
-                      checked={formData.visitArea.includes(area)}
-                      onChange={(e) => handleCheckboxChange(e, "visitArea")}
-                      value={area}
+                      checked={formData.visitArea.includes(v.name)}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          visitArea: e.target.checked
+                            ? [...prev.visitArea, v.name]
+                            : prev.visitArea.filter((item) => item !== v.name),
+                        }))
+                      }
+                      value={v.name}
                     />
-                    <span className="ml-2 text-sm">{area}</span>
+                    <span className="ml-2 text-sm">{v.name}</span>
                   </label>
                 ))}
               </div>
@@ -765,8 +813,11 @@ const CreatePassPage: React.FC = () => {
                   className="w-full px-3 py-2 border-b-2 border-gray-300 outline-none"
                 >
                   <option value="">Select</option>
-                  <option value="AUDIT">AUDIT</option>
-                  <option value="MEETING">MEETING</option>
+                  {purposes.map((e: any) => (
+                    <option key={e._id} value={e._id}>
+                      {e.name}
+                    </option>
+                  ))}
                 </select>
               </FormField>
               <FormField label="Allowed Hours" htmlFor="allowedHours">

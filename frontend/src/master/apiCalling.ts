@@ -7,18 +7,20 @@ import {
 } from "@/shared/services/api";
 import { API_ENDPOINTS } from "@/shared/const/api";
 import { type AxiosResponse } from "axios";
+import type { IEmployee, EmployeePayload } from "@/master/types";
+
 
 const unwrapData = (res: AxiosResponse<any>) => res.data?.data || res.data;
 
 //----------------------Employee CRUD Calling---------------------------------------
-export const getEmployee = () => {
+export const getEmployee = (): Promise<IEmployee[]> => {
   return queryGet(
     API_ENDPOINTS.EMPLOYEE,
     {},
     { cache: true, tags: ["employee"] },
   ).then((res) => unwrapData(res).employee || unwrapData(res));
 };
-export const createEmployee = (payload: any) => {
+export const createEmployee = (payload: EmployeePayload): Promise<IEmployee> => {
   return queryPost(
     API_ENDPOINTS.EMPLOYEE,
     payload,
@@ -26,7 +28,7 @@ export const createEmployee = (payload: any) => {
     { invalidateTags: ["employee"] },
   ).then(unwrapData);
 };
-export const updateEmployee = (id: string, payload: any) => {
+export const updateEmployee = (id: string, payload: Partial<EmployeePayload>):  Promise<IEmployee> => {
   return queryPut(
     `${API_ENDPOINTS.EMPLOYEE}/${id}`,
     payload,
